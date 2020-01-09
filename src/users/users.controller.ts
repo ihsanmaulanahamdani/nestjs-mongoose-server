@@ -5,8 +5,10 @@ import {
   Get,
   Param,
   Patch,
-  Delete
+  Delete,
+  UseGuards
 } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
 
 import { UsersService } from "./users.service";
 
@@ -15,11 +17,16 @@ export class UserController {
   constructor(private readonly usersServices: UsersService) {}
 
   @Post()
-  async createUser(@Body("name") name: string, @Body("email") email: string) {
-    return await this.usersServices.createUser({ name, email });
+  async createUser(
+    @Body("name") name: string,
+    @Body("email") email: string,
+    @Body("password") password: string
+  ) {
+    return await this.usersServices.createUser({ name, email, password });
   }
 
   @Get()
+  @UseGuards(AuthGuard("jwt"))
   async getAllUsers() {
     return await this.usersServices.getAllUsers();
   }
@@ -33,9 +40,10 @@ export class UserController {
   async updateUser(
     @Param("id") id: string,
     @Body("name") name: string,
-    @Body("email") email: string
+    @Body("email") email: string,
+    @Body("password") password: string
   ) {
-    return await this.usersServices.updateUser(id, { name, email });
+    return await this.usersServices.updateUser(id, { name, email, password });
   }
 
   @Delete(":id")
